@@ -11,7 +11,7 @@ class Contact:
 
 class ContactManager:
     def __init__(self):
-        self.contacts = []  # Inicializar la lista de contactos
+        self.contacts = []
 
     def add_contact(self, name, phone, email):
         self.contacts.append(Contact(name, phone, email))
@@ -45,8 +45,22 @@ class ContactManager:
                 csvwriter.writerow([contact.name, contact.phone, contact.email])
         print(f"Datos exportados a {filename}")
 
+    def import_from_csv(self, filename):
+        try:
+            with open(filename, 'r', newline='', encoding='utf-8') as csvfile:
+                csvreader = csv.reader(csvfile)
+                next(csvreader)  # Saltar la cabecera
+                for row in csvreader:
+                    if len(row) == 3:
+                        self.add_contact(row[0], row[1], row[2])
+            print(f"Datos importados desde {filename}")
+        except FileNotFoundError:
+            print(f"El archivo {filename} no se encontró.")
+
 def main():
     manager = ContactManager()
+    filename = 'Usuarios.csv'
+    manager.import_from_csv(filename)
 
     while True:
         print("1. Agregar contacto")
@@ -66,10 +80,13 @@ def main():
             manager.add_contact(name, phone, email)
         elif choice == '2':
             index = int(input("Índice del contacto a editar: "))
-            name = input("Nuevo nombre: ")
-            phone = input("Nuevo teléfono: ")
-            email = input("Nuevo email: ")
-            manager.edit_contact(index, name, phone, email)
+            if 0 <= index < len(manager.contacts):
+                name = input("Nuevo nombre: ")
+                phone = input("Nuevo teléfono: ")
+                email = input("Nuevo email: ")
+                manager.edit_contact(index, name, phone, email)
+            else:
+                print("Índice fuera de rango.")
         elif choice == '3':
             index = int(input("Índice del contacto a eliminar: "))
             manager.delete_contact(index)
@@ -95,7 +112,6 @@ def main():
             else:
                 print("No hay contactos para analizar.")
         elif choice == '7':
-            filename = 'Usuarios.csv'
             manager.export_to_csv(filename)
         elif choice == '8':
             break
